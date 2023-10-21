@@ -5,7 +5,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 // Configuración para realizar la checkout de tu repositorio (por ejemplo, usando Git).
-                git credentialsId: 'MN_Token', url: 'https://github.com/MariangelaNM/Mariangela_libreria'      }
+                git credentialsId: 'MN_Token', url: 'https://github.com/MariangelaNM/Mariangela_libreria'      
             }
         }
         
