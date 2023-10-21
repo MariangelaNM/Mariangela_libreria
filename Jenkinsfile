@@ -4,7 +4,7 @@ pipeline {
     agent any
 
     environment {
-        CUSTOM_BRANCH = 'main'
+        CUSTOM_BRANCH = 'test'
     }
 
     stages {
