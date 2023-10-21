@@ -16,7 +16,7 @@ def call(projectKey, gitBranch, abortPipeline = false) {
         haveToExitPipeline = true
     } else if (!abortPipeline) {
         // Verificar si abortar el pipeline según el nombre de la rama gitBranch
-        if (gitBranch == 'main' || gitBranch.startsWith('hotfix')) {
+        if (gitBranch == 'mains' || gitBranch.startsWith('hotfix')) {
             haveToExitPipeline = true
         }
     }
