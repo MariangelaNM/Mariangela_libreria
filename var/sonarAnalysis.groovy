@@ -1,48 +1,31 @@
-// Importar las clases necesarias de Jenkins
-import hudson.model.BuildListener
-import jenkins.model.Jenkins
-import hudson.EnvVars
-import hudson.FilePath
+def call(projectKey, gitBranch, abortPipeline = false) {
+    def scannerResult = 100 // Inicializar con algo diferente de 0
+    def haveToExitPipeline = false
 
-// Definir la función "call" con un parámetro booleano opcional
-def call(boolean abortOnQualityGate = false) {
-    // Verificar si se debe realizar un escaneo de SonarQube o solo mostrar un mensaje
-    if (abortOnQualityGate) {
-        // Realizar un escaneo de SonarQube
-        try {
-            def sonarScannerHome = tool name: 'SonarQube Scanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
-            def env = Jenkins.instance.getGlobalNodeProperties()[0].getEnvVars()
-            def sonarScannerPath = "${sonarScannerHome}/bin/sonar-scanner"
-            
-            sh """
-                ${sonarScannerPath}
-            """
-        } catch (Exception e) {
-            currentBuild.result = 'FAILURE'
-            error "Failed to execute SonarQube analysis: ${e.message}"
+    timeout(time: 20, unit: 'SECONDS') {
+        withSonarQubeEnv(installationName: 'SonarLocal', credentialsId: 'SonarQube_Token')  {
+            scannerResult = bat(script: "sonar-scanner -Dsonar.projectKey=${projectKey} -Dsonar.sources=.", returnStatus: true)
         }
-    } else {
-        // Mostrar un mensaje de prueba en lugar de ejecutar SonarQube
-        echo "Ejecución de las pruebas de calidad de código (Simulado)"
     }
 
-    // Esperar durante 5 minutos con un timeout
-    timeout(time: 5, unit: 'MINUTES') {
-        // Puedes agregar aquí las acciones que se deben realizar durante la espera
-        // Por ejemplo, ejecutar pruebas unitarias o realizar otras tareas de construcción
-    }
+    echo "scannerResult ${scannerResult}"
+    echo "abortPipeline ${abortPipeline}"
+    echo "gitBranch ${gitBranch}"
 
-    // Verificar el resultado del escaneo de calidad de código
-    try {
-        // Consultar el estado del Quality Gate en SonarQube
-        def qualityGateStatus = sh script: 'sonar-scanner -Dsonar.qualitygate.wait=true', returnStatus: true
-
-        // Si el Quality Gate no pasa, abortar el pipeline
-        if (qualityGateStatus != 0) {
-            error "Quality Gate no aprobado. Abortando el pipeline."
+    if (abortPipeline && scannerResult != 0) {
+        haveToExitPipeline = true
+    } else if (!abortPipeline) {
+        // Verificar si abortar el pipeline según el nombre de la rama gitBranch
+        if (gitBranch == 'master' || gitBranch.startsWith('hotfix')) {
+            haveToExitPipeline = true
         }
-    } catch (Exception e) {
-        currentBuild.result = 'FAILURE'
-        error "Error al verificar el Quality Gate: ${e.message}"
     }
+
+    echo "haveToExitPipeline ${haveToExitPipeline}"
+
+    if (haveToExitPipeline) {
+        error("SonarQube scan failed with result code: ${scannerResult}")
+    }
+
+    return scannerResult
 }
