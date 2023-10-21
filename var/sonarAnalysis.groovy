@@ -1,33 +1,25 @@
-def call(boolean abortOnFailure = false, boolean abortPipeline = false) {
-    // Ejecuta el análisis de SonarQube
-    try {
-        withSonarQubeEnv(installationName: 'Sonar Local', credentialsId: 'sonar-token') {
-            def scannerHome = tool 'SonarScanner'
-            sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=threepoints_devops_webserver -Dsonar.projectName=threepoints_devops_webserver"
-        }
-    } catch (Exception sonarException) {
-        error("Failed to run SonarQube analysis: ${sonarException.message}")
-        if (abortPipeline) {
-            currentBuild.result = 'FAILURE'
-            error("Aborting the pipeline.")
-        }
-        return
-    }
+def call(projectKey, gitBranch, abortPipeline = false) {
+    def scannerResult = 1
+    def haveToExitPipeline = false
 
-    // Espera 5 minutos con un timeout
-    timeout(time: 5, unit: 'MINUTES') {
-        // Comprueba el resultado del QualityGate de SonarQube
-        script {
-            def qualityGateStatus = waitForQualityGate()
-            if (qualityGateStatus != 'OK' && abortOnFailure) {
-                error("QualityGate failed.")
-                if (abortPipeline) {
-                    currentBuild.result = 'FAILURE'
-                    error("Aborting the pipeline.")
-                }
-            }
+    timeout(time: 30, unit: 'SECONDS') {
+        withSonarQubeEnv(installationName: 'SonarLocal', credentialsId: 'sonar-token')  {
+            scannerResult = bat(script: "sonar-scanner -Dsonar.projectKey=${projectKey} -Dsonar.sources=.", returnStatus: true)
         }
     }
 
-    return this
+    if (abortPipeline && scannerResult != 0) {
+        haveToExitPipeline = true
+    } else if (!abortPipeline) {
+        // Verificar si abortar el pipeline segun nombre de la rama gitBranch
+        if (gitBranch == 'masters' || gitBranch.startsWith('hotfix')) {
+            haveToExitPipeline = true
+        }
+    }
+
+    if (haveToExitPipeline) {
+        error("SonarQube scan failed with result code: ${scannerResult}")
+    }
+
+    return scannerResult
 }
