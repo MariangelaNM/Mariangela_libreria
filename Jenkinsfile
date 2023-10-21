@@ -17,6 +17,7 @@ pipeline {
                 script {
                     def sonarAnalysisScript = load 'vars/sonarAnalysis.groovy'
                     sonarAnalysisScript()
+                      echo "---Fin-----"
                 }
             }
         }
