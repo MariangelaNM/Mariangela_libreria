@@ -12,14 +12,14 @@ def call(projectKey, gitBranch, abortPipeline = false) {
     echo "abortPipeline ${abortPipeline}"
     echo "gitBranch ${gitBranch}"
 
-    if (abortPipeline && scannerResult != 0) {
+    /*if (abortPipeline && scannerResult != 0) {
         haveToExitPipeline = true
     } else if (!abortPipeline) {
         // Verificar si abortar el pipeline según el nombre de la rama gitBranch
         if (gitBranch == 'mains' || gitBranch.startsWith('hotfix')) {
             haveToExitPipeline = true
         }
-    }
+    }*/
 
     echo "haveToExitPipeline ${haveToExitPipeline}"
 
