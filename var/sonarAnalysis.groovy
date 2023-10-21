@@ -1,13 +1,18 @@
 def call(boolean abortOnFailure = false, boolean abortPipeline = false) {
     // Ejecuta el análisis de SonarQube
-      environment {
-                SCANNER_HOME = tool 'SonarScanner'
-            }
-         
-                withSonarQubeEnv(installationName: 'Sonar Local',credentialsId: 'sonar-token') {
-                    sh '${SCANNER_HOME}/bin/sonar-scanner -Dsonar.projectKey=threepoints_devops_webserver -Dsonar.projectName=threepoints_devops_webserver'
-                }   
-             
+    try {
+        withSonarQubeEnv(installationName: 'Sonar Local', credentialsId: 'sonar-token') {
+            def scannerHome = tool 'SonarScanner'
+            sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=threepoints_devops_webserver -Dsonar.projectName=threepoints_devops_webserver"
+        }
+    } catch (Exception sonarException) {
+        error("Failed to run SonarQube analysis: ${sonarException.message}")
+        if (abortPipeline) {
+            currentBuild.result = 'FAILURE'
+            error("Aborting the pipeline.")
+        }
+        return
+    }
 
     // Espera 5 minutos con un timeout
     timeout(time: 5, unit: 'MINUTES') {
@@ -19,11 +24,10 @@ def call(boolean abortOnFailure = false, boolean abortPipeline = false) {
                 if (abortPipeline) {
                     currentBuild.result = 'FAILURE'
                     error("Aborting the pipeline.")
-                    return
                 }
             }
         }
     }
-}
 
-return this
+    return this
+}
