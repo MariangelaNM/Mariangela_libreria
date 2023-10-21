@@ -1,39 +1,46 @@
+@Library('threepoints_sharedlib') _
+
 pipeline {
     agent any
-    
+
+    environment {
+        CUSTOM_BRANCH = 'hotfix_rapido'
+    }
+
     stages {
+        
         stage('Checkout') {
             steps {
-                // Configuración para realizar la checkout de tu repositorio (por ejemplo, usando Git).
-                git credentialsId: 'MN_Token', url: 'https://github.com/MariangelaNM/Mariangela_libreria'      
+                echo 'Obtener codigo desde Github'
+            git credentialsId: 'MN_Token', url: 'https://github.com/MariangelaNM/Mariangela_libreria'      }
             }
         }
         
-        stage('SonarQube Analysis') {
-            steps {
-                // Carga el script sonarAnalysis.groovy y llama a la función.
-                echo "---Este es un mensaje que se imprimirá en la consola de Jenkins-----"
+stage('Pruebas de SAST') {
+    steps {
+        script { 
+            def gitBranch = CUSTOM_BRANCH
+            bat "echo La rama actual del Jenkinsfile es: ${gitBranch}"
+            
+            if (isUnix()) {
+                sh 'echo Running SAST on Unix'
+                // Add your Unix SAST script commands here
+            } else {
+                bat 'echo Running SAST on Windows'
+                // Add your Windows SAST batch script commands here
+            }
+        }
+    }
+}
 
-                script {
-                    def sonarAnalysisScript = load 'vars/sonarAnalysis.groovy'
-                    sonarAnalysisScript()
-                      echo "---Fin-----"
-                }
+        
+        stage('Build') {
+            steps {
+                echo 'Construcción de la imagen Docker'
+                bat 'docker build --tag devops_ws .'
+                
             }
         }
 
-       /* stage('Build') {
-            steps {
-                // Acciones para compilar tu proyecto.
-                sh 'mvn clean install'
-            }
-        }
-
-        stage('Deploy') {
-            steps {
-                // Acciones para desplegar tu proyecto en un entorno específico.
-                sh 'deploy-script.sh'
-            }
-        }*/
     }
 }
