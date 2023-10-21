@@ -18,10 +18,10 @@ pipeline {
         stage('Pruebas de SAST') {
             steps {
                 script { 
-                    def gitBranch = env.CUSTOM_BRANCH 
-                    bat "echo La rama actual del Jenkinsfile es: ${gitBranch}"
-                    bat "echo Jenkinsfile: ${env.CUSTOM_BRANCH}" 
-                    def result = sonarAnalysis('threepoints_devops_webserver', gitBranch, true)
+                  //  def gitBranch = env.CUSTOM_BRANCH 
+                    bat "echo La rama actual del Jenkinsfile es: ${env.CUSTOM_BRANCH }"
+                  /*  bat "echo Jenkinsfile: ${env.CUSTOM_BRANCH}" 
+                    def result = sonarAnalysis('threepoints_devops_webserver', gitBranch, true)*/
                 }
             }
         }
