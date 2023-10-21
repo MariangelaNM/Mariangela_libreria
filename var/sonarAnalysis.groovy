@@ -1,31 +1,36 @@
-def call(projectKey, gitBranch, abortPipeline = false) {
-    def scannerResult = 100 // Inicializar con algo diferente de 0
-    def haveToExitPipeline = false
+pipeline {
+    agent any
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                // Configuración para realizar la checkout de tu repositorio (por ejemplo, usando Git).
+               git credentialsId: 'MN_Token', url: 'https://github.com/MariangelaNM/Mariangela_libreria'      }
+            }
+        }
+        
+        stage('SonarQube Analysis') {
+            steps {
+                // Carga el script sonarAnalysis.groovy y llama a la función.
+                script {
+                    def sonarAnalysisScript = load 'vars/sonarAnalysis.groovy'
+                    sonarAnalysisScript()
+                }
+            }
+        }
 
-   /* timeout(time: 20, unit: 'SECONDS') {
-        withSonarQubeEnv(installationName: 'Sonar Local', credentialsId: 'sonar-token') {
-            scannerResult = bat(script: "sonar-scanner -Dsonar.projectKey=${projectKey} -Dsonar.sources=.", returnStatus: true)
+        stage('Build') {
+            steps {
+                // Acciones para compilar tu proyecto.
+                sh 'mvn clean install'
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                // Acciones para desplegar tu proyecto en un entorno específico.
+                sh 'deploy-script.sh'
+            }
         }
     }
-
-    echo "scannerResult ${scannerResult}"
-    echo "abortPipeline ${abortPipeline}"
-    echo "gitBranch ${gitBranch}"
-
-    /*if (abortPipeline && scannerResult != 0) {
-        haveToExitPipeline = true
-    } else if (!abortPipeline) {
-        // Verificar si abortar el pipeline según el nombre de la rama gitBranch
-        if (gitBranch == 'mains' || gitBranch.startsWith('hotfix')) {
-            haveToExitPipeline = true
-        }
-    }
-
-    echo "haveToExitPipeline ${haveToExitPipeline}"
-
-    if (haveToExitPipeline) {
-        error("SonarQube scan failed with result code: ${scannerResult}")
-    }*/
-
-    return true
 }
