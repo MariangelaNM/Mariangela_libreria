@@ -11,8 +11,8 @@ pipeline {
         
         stage('Checkout') {
             steps {
-                 git MN_Token: 'MN_Token', url: 'https://github.com/MariangelaNM/threepoints_devops_webserver'
-            }
+                      git credentialsId: 'MN_Token', url: 'https://github.com/MariangelaNM/threepoints_devops_webserver'
+       }
         }
         
         stage('Pruebas de SAST') {
