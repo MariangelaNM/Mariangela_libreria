@@ -12,6 +12,8 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 // Carga el script sonarAnalysis.groovy y llama a la función.
+                echo "---Este es un mensaje que se imprimirá en la consola de Jenkins-----"
+
                 script {
                     def sonarAnalysisScript = load 'vars/sonarAnalysis.groovy'
                     sonarAnalysisScript()
@@ -19,7 +21,7 @@ pipeline {
             }
         }
 
-        stage('Build') {
+       /* stage('Build') {
             steps {
                 // Acciones para compilar tu proyecto.
                 sh 'mvn clean install'
@@ -31,6 +33,6 @@ pipeline {
                 // Acciones para desplegar tu proyecto en un entorno específico.
                 sh 'deploy-script.sh'
             }
-        }
+        }*/
     }
 }
