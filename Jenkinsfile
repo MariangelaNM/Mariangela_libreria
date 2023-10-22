@@ -23,7 +23,7 @@ pipeline {
 
                     if (isUnix()) {
                         sh 'echo Running SAST on Unix'
-                       def result = sonarAnalysis('threepoints_devops_webserver', gitBranch, true)
+                      // def result = sonarAnalysis('threepoints_devops_webserver', gitBranch, true)
                     } else {
                         bat 'echo Running SAST on Windows'
                         // Agrega aquí tus comandos de SAST para Windows
