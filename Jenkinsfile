@@ -23,14 +23,7 @@ pipeline {
 
                     if (isUnix()) {
                         sh 'echo Running SAST on Unix'
- environment {
-                SCANNER_HOME = tool 'SonarScanner'
-            }
-            steps {
-                withSonarQubeEnv(installationName: 'Sonar Local',credentialsId: 'sonar-token') {
-                    sh '${SCANNER_HOME}/bin/sonar-scanner -Dsonar.projectKey=threepoints_devops_webserver -Dsonar.projectName=threepoints_devops_webserver'
-                }   
-            }
+                       def result = sonarAnalysis('threepoints_devops_webserver', gitBranch, true)
                     } else {
                         bat 'echo Running SAST on Windows'
                         // Agrega aquí tus comandos de SAST para Windows
