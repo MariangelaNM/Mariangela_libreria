@@ -11,7 +11,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 echo 'Obtener código desde GitHub'
-                git credentialsId: 'MN_Token', url: 'https://github.com/MariangelaNM/Mariangela_libreria'
+              git credentialsId: 'MN_Token', url: 'https://github.com/MariangelaNM/Mariangela_libreria'      
             }
         }
 
