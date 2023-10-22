@@ -23,7 +23,14 @@ pipeline {
 
                     if (isUnix()) {
                         sh 'echo Running SAST on Unix'
-                        // Agrega aquí tus comandos de SAST para Unix
+ environment {
+                SCANNER_HOME = tool 'SonarScanner'
+            }
+            steps {
+                withSonarQubeEnv(installationName: 'Sonar Local',credentialsId: 'sonar-token') {
+                    sh '${SCANNER_HOME}/bin/sonar-scanner -Dsonar.projectKey=threepoints_devops_webserver -Dsonar.projectName=threepoints_devops_webserver'
+                }   
+            }
                     } else {
                         bat 'echo Running SAST on Windows'
                         // Agrega aquí tus comandos de SAST para Windows
@@ -32,11 +39,6 @@ pipeline {
             }
         }
 
-        stage('Build') {
-            steps {
-                echo 'Construcción de la imagen Docker'
-                bat 'docker build --tag devops_ws .'
-            }
-        }
+        
     }
 }
