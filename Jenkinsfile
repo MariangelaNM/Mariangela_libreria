@@ -4,7 +4,7 @@ pipeline {
     agent any
 
     environment {
-        CUSTOM_BRANCH = 'lala'
+        CUSTOM_BRANCH = 'hotfix-TEST'
     }
 
     stages {
